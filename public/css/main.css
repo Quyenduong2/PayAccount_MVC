@@ -1,0 +1,412 @@
+@charset "UTF-8";
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-primary: #00ff9c;
+  --color-primary-blur: rgb(0, 255, 156, 0.9);
+  --color-secondary: #169976;
+  --color-dark: #222222;
+  --color-black: #000000;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: var(--color-dark);
+  color: #ffffff;
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--color-black);
+  padding: 15px 0;
+}
+
+.navbar-brand {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--color-primary) !important;
+}
+
+.navbar-nav .nav-link {
+  color: #ffffff !important;
+  font-size: 16px;
+  margin-left: 10px;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--color-primary) !important;
+  text-decoration: none !important;
+}
+
+.dropdown-menu {
+  background-color: var(--color-black);
+  border: none;
+}
+
+.login-nav .nav-link:hover {
+  color: var(--color-primary);
+  background-color: var(--color-black);
+  text-decoration: none !important;
+}
+.login-nav .dropdown-menu {
+  background-color: var(--color-black);
+  border: none;
+}
+.login-nav .dropdown-menu .dropdown-item {
+  color: #fff;
+  text-decoration: none;
+}
+.login-nav .dropdown-menu .dropdown-item:hover {
+  background-color: transparent;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* Search Bar */
+.search-container {
+  position: relative;
+  width: 450px;
+  display: flex;
+  justify-content: center;
+  margin: 10px auto;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 20px;
+  padding-right: 40px;
+  background: transparent;
+  border: 2px solid var(--color-secondary);
+  border-radius: 25px;
+  color: var(--color-primary);
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input::-moz-placeholder {
+  color: var(--color-primary);
+  opacity: 0.7;
+}
+
+.search-input::placeholder {
+  color: var(--color-primary);
+  opacity: 0.7;
+}
+
+.search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 8px var(--color-primary);
+}
+
+.search-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-primary);
+  font-size: 18px;
+}
+
+/* carousel  */
+.carousel-item {
+  text-align: center;
+}
+.carousel-item a {
+  cursor: pointer;
+}
+.carousel-item img {
+  width: 100%;
+  height: 400px;
+  -o-object-fit: contain;
+     object-fit: contain;
+  border-radius: 10px;
+}
+.carousel-item img :hover {
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 10px var(--color-primary-blur));
+}
+
+.carousel-control-prev-icon {
+  background-image: url(./public/images/arrow_back_ios_24dp_00FF9C_FILL0_wght400_GRAD0_opsz24.svg) !important;
+}
+
+.carousel-control-next-icon {
+  background-image: url(./public/images/arrow_forward_ios_24dp_00FF9C_FILL0_wght400_GRAD0_opsz24.svg) !important;
+}
+
+.carousel-indicators [data-bs-target] {
+  background-color: var(--color-primary) !important;
+}
+
+/* Game Categories */
+.game-categories {
+  padding: 40px 0;
+}
+
+.game-categories h2 {
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.game-card {
+  background-color: var(--color-black);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.game-card:hover {
+  transform: scale(1.05);
+}
+
+.game-card a img {
+  width: 100%;
+  height: 114px;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+.game-card a:hover {
+  text-decoration: none;
+}
+
+.game-card h3 {
+  color: var(--color-secondary);
+  padding: 10px;
+  font-size: 18px;
+}
+
+/* Guide Section */
+.guide {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.guide h2 {
+  color: var(--color-primary);
+  margin-bottom: 20px;
+}
+
+.guide p {
+  color: #cccccc;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Footer */
+footer {
+  background-color: var(--color-black);
+  padding: 20px;
+  text-align: center;
+  color: #cccccc;
+}
+
+footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+@media (max-width: 768px) {
+  .navbar-nav .nav-link {
+    margin-left: 0;
+    padding: 10px;
+  }
+  .swiper-slide h1 {
+    font-size: 32px;
+  }
+  .search-form {
+    max-width: 100%;
+  }
+}
+/* login  */
+.login-container {
+  background-color: var(--color-black);
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 400px;
+  margin: 50px auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  color: var(--color-secondary);
+}
+
+.form-group input[type=text],
+.form-group input[type=email],
+.form-group input[type=password] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-secondary);
+  border-radius: 4px;
+  background-color: var(--color-dark);
+  color: white;
+  box-sizing: border-box;
+  /* Đảm bảo padding không làm tăng kích thước input */
+}
+
+.btn-login,
+.btn-register {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: var(--color-primary);
+  color: var(--color-dark);
+  /* Nút màu sáng, chữ màu tối */
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-login:hover,
+.btn-register:hover {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.remember-me label {
+  color: white;
+  padding: 0 5px;
+}
+
+/* register  */
+.register_body {
+  background-color: var(--color-dark);
+  color: white;
+  font-family: sans-serif;
+  display: flex;
+  /* Dùng flexbox để căn giữa */
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  /* Chiều cao tối thiểu bằng chiều cao viewport */
+  /* Màu viền khi input được focus */
+  /* Responsive cho màn hình nhỏ hơn */
+}
+.register_body .register-container {
+  background-color: var(--color-black);
+  padding: 30px;
+  border-radius: 8px;
+  width: 35%;
+  /* Chiếm toàn bộ chiều rộng nếu nhỏ hơn max-width */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  /* Đảm bảo padding không làm tăng kích thước */
+}
+.register_body h2 {
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 20px;
+}
+.register_body .form-group {
+  margin-bottom: 15px;
+}
+.register_body .form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--color-secondary);
+  font-weight: bold;
+  /* In đậm label */
+}
+.register_body .form-group input[type=text],
+.register_body .form-group input[type=email],
+.register_body .form-group input[type=password] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-secondary);
+  border-radius: 4px;
+  background-color: var(--color-dark);
+  color: white;
+  box-sizing: border-box;
+  font-size: 16px;
+  /* Kích thước chữ dễ đọc */
+}
+.register_body .form-group input[type=text]:focus,
+.register_body .form-group input[type=email]:focus,
+.register_body .form-group input[type=password]:focus {
+  outline: none;
+  /* Bỏ viền mặc định của trình duyệt */
+  border-color: var(--color-primary);
+  box-shadow: 0 0 5px rgba(0, 255, 156, 0.5);
+  /* Đổ bóng nhẹ */
+}
+.register_body .btn-register {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: var(--color-primary);
+  color: var(--color-dark);
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-weight: bold;
+}
+.register_body .btn-register:hover {
+  background-color: var(--color-secondary);
+  color: white;
+}
+.register_body .message {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+.register_body .message.error {
+  background-color: #ffcccc;
+  color: #cc0000;
+  border: 1px solid #ff9999;
+}
+.register_body .message.success {
+  background-color: #ccffcc;
+  color: #006600;
+  border: 1px solid #99ff99;
+}
+@media (max-width: 500px) {
+  .register_body .register-container {
+    margin: 20px;
+    padding: 20px;
+  }
+}/*# sourceMappingURL=main.css.map */
