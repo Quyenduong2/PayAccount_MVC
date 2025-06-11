@@ -455,4 +455,79 @@ class AuthController
     error_log("Sell Account page accessed, user: {$user['email']}");
     require './app/Views/Auth/sell_account.php';
 }
+
+public function addGame()
+{
+    $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
+    if (!isset($_COOKIE['auth_token'])) {
+        error_log("Add game: No auth_token, redirecting to login");
+        header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/login');
+        exit;
+    }
+    $userModel = new User();
+    $user = $userModel->getUserByToken($_COOKIE['auth_token']);
+    if (!$user || $user['role'] !== 'admin') {
+        error_log("Add game: User not admin, redirecting to profile");
+        header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/profile');
+        exit;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        error_log("Add game: POST request received");
+        error_log("POST data: " . print_r($_POST, true));
+        error_log("FILES data: " . print_r($_FILES, true));
+
+        $game_name = $_POST['game_name'] ?? '';
+        $game_slug = $_POST['game_slug'] ?? '';
+        $description = $_POST['description'] ?? '';
+
+        if ($game_name && $game_slug && !empty($_FILES['game_image']['name'])) {
+            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "$basePath/public/uploads/games/";
+            $baseUrl = "http://localhost$basePath/public/uploads/games/";
+
+            // Tạo thư mục nếu chưa tồn tại
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // Xử lý upload ảnh
+            $image = $_FILES['game_image'];
+            if ($image['error'] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                if (in_array($ext, $allowed_extensions)) {
+                    $filename = uniqid('game_') . '.' . $ext;
+                    $dest_path = $uploadDir . $filename;
+                    if (move_uploaded_file($image['tmp_name'], $dest_path)) {
+                        $game_image = $baseUrl . $filename;
+
+                        // Lưu game vào database
+                        $gameModel = new Game();
+                        if ($gameModel->create($game_name, $game_slug, $game_image, $description)) {
+                            $success = "Thêm game thành công!";
+                        } else {
+                            $error = "Thêm game thất bại. Vui lòng thử lại.";
+                            error_log("Add game: Failed to create game");
+                        }
+                    } else {
+                        $error = "Không thể lưu ảnh game.";
+                        error_log("Add game: Failed to move uploaded file: " . $image['name']);
+                    }
+                } else {
+                    $error = "Định dạng ảnh không hợp lệ (chỉ hỗ trợ JPG, PNG, GIF).";
+                    error_log("Add game: Invalid file extension: " . $image['name']);
+                }
+            } else {
+                $error = "Lỗi khi upload ảnh.";
+                error_log("Add game: Upload error code: " . $image['error']);
+            }
+        } else {
+            $error = "Vui lòng điền đầy đủ thông tin và upload ảnh game.";
+            error_log("Add game: Invalid form data or no image uploaded");
+        }
+    }
+
+    error_log("Add Game page accessed, user: {$user['email']}");
+    require './app/Views/Auth/add_game.php';
+}
 }

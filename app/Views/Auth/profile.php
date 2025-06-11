@@ -58,7 +58,7 @@
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <h4 class="mb-4">PayAccount</h4>
+        <h4 class="mb-4"><a  class="nav-link" href="<?php echo htmlspecialchars($basePath . '/'); ?>">PayAccount</a></h4>
         <ul class="nav flex-column">
             <?php if ($user['role'] === 'user'): ?>
                 <li class="nav-item">
