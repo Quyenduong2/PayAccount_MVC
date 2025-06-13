@@ -1,3 +1,4 @@
+<!-- manage kyc -->
 <div class="card">
     <div class="card-body">
         <h4>Quản lý KYC Requests</h4>

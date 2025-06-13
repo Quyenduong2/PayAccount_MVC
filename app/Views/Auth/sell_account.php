@@ -48,7 +48,7 @@
 </head>
 <body>
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar ">
         <h4 class="mb-4">PayAccount</h4>
         <ul class="nav flex-column">
             <?php if ($user['role'] === 'user'): ?>

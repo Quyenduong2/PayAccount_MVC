@@ -1,3 +1,4 @@
+<!-- manage user -->
 <div class="container mt-4">
     <h2>Quản lý người dùng</h2>
     <?php if (!empty($success)): ?>

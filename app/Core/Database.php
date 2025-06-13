@@ -1,4 +1,5 @@
 <?php
+//phpmyadmin
 class Database {
     private $host = 'localhost';
     private $dbname = 'payaccount';

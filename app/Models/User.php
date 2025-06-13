@@ -1,6 +1,6 @@
 <?php
 require_once './app/Core/Database.php';
-
+// Account model
 class User
 {
     private $db;

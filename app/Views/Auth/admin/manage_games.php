@@ -1,3 +1,4 @@
+<!-- manage games -->
 <div class="card">
     <div class="card-body">
         <h4>Quản lý Games</h4>

@@ -1,3 +1,4 @@
+<!-- admin dasboard -->
 <div class="card">
     <div class="card-body">
         <h4>Chào mừng, <?php echo htmlspecialchars($user['full_name']); ?>!</h4>

@@ -1,3 +1,4 @@
+<!-- profile -->
 <div class="card" style="max-width: 500px;">
     <div class="card-body">
         <p><strong>Tên đăng nhập:</strong> <?php echo htmlspecialchars($user['username']); ?></p>

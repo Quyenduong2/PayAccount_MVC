@@ -1,3 +1,4 @@
+<!-- manage account -->
 <div class="container mt-4">
     <h2>Quản lý tài khoản</h2>
     <?php if (!empty($success)): ?>
