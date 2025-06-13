@@ -110,6 +110,8 @@ body {
   transform: translateY(-50%);
   color: var(--color-primary);
   font-size: 18px;
+  background: transparent;
+  border: none;
 }
 
 /* carousel  */
@@ -322,6 +324,11 @@ a:hover {
   min-height: 100vh;
   /* Chiều cao tối thiểu bằng chiều cao viewport */
   /* Màu viền khi input được focus */
+  /* Modal tìm kiếm */
+  /* Modal giỏ hàng slide từ phải */
+  /* Badge số lượng giỏ hàng */
+  /* Nút thêm vào giỏ hàng */
+  /* Responsive cho modal */
   /* Responsive cho màn hình nhỏ hơn */
 }
 .register_body .register-container {
@@ -403,6 +410,138 @@ a:hover {
   background-color: #ccffcc;
   color: #006600;
   border: 1px solid #99ff99;
+}
+.register_body .modal-content {
+  background: var(--color-black);
+  color: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--color-secondary);
+}
+.register_body .modal-header,
+.register_body .modal-footer {
+  border: none;
+  background: var(--color-black);
+}
+.register_body .modal-title {
+  color: var(--color-primary);
+}
+.register_body .modal-body {
+  background: var(--color-dark);
+}
+.register_body #searchResults > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-secondary);
+}
+.register_body #searchResults img {
+  width: 40px;
+  height: 40px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: 6px;
+  background: #222;
+}
+.register_body #searchResults a {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+.register_body #searchResults a:hover {
+  text-decoration: underline;
+}
+.register_body #cartModal .modal-dialog {
+  position: fixed;
+  right: 0;
+  top: 0;
+  margin: 0;
+  height: 100vh;
+  max-width: 400px;
+  width: 100%;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1055;
+}
+.register_body #cartModal.show .modal-dialog {
+  transform: translateX(0);
+}
+.register_body #cartModal .modal-content {
+  height: 100vh;
+  border-radius: 0;
+  border-left: 2px solid var(--color-secondary);
+  background: var(--color-black);
+  color: #fff;
+}
+.register_body #cartModal .modal-header {
+  border-bottom: 1px solid var(--color-secondary);
+}
+.register_body #cartModal .modal-title {
+  color: var(--color-primary);
+}
+.register_body #cartModalBody {
+  background: var(--color-dark);
+  padding-bottom: 30px;
+  min-height: 200px;
+}
+.register_body .list-group-item.cart-item {
+  background: var(--color-dark);
+  color: #fff;
+  border: 1px solid var(--color-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.register_body .list-group-item.cart-item .btn-remove-cart {
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 3px 10px;
+  font-size: 13px;
+}
+.register_body .list-group-item.cart-item .btn-remove-cart:hover {
+  background: #d32f2f;
+}
+.register_body #cartCount {
+  font-size: 12px;
+  background: var(--color-primary);
+  color: var(--color-dark);
+  border: 1px solid var(--color-dark);
+  min-width: 18px;
+  min-height: 18px;
+  padding: 2px 5px;
+  top: 2px;
+  right: 2px;
+}
+.register_body .btn-cart,
+.register_body .btn-add-cart {
+  background-color: var(--color-primary);
+  color: var(--color-dark);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  display: inline-block;
+}
+.register_body .btn-cart:hover,
+.register_body .btn-add-cart:hover {
+  background-color: var(--color-secondary);
+  color: #fff;
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  .register_body #cartModal .modal-dialog {
+    max-width: 100vw;
+  }
+  .register_body .modal-content {
+    font-size: 15px;
+  }
 }
 @media (max-width: 500px) {
   .register_body .register-container {

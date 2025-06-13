@@ -2,6 +2,8 @@
 require_once './app/Controllers/HomeController.php';
 require_once './app/Controllers/AuthController.php';
 require_once './app/Controllers/AccountController.php';
+require_once './app/Controllers/CartController.php';
+
 
 // Đơn giản routing dựa trên URL
 $base_path = '/BaiTapChuyenDePHP/PayAccount_MVC';
@@ -37,6 +39,20 @@ if ($uri === '/' && $method === 'GET') {
     error_log("Sell Account route accessed"); // Debug
     $controller = new AuthController();
     $controller->sellAccount();
+}
+elseif ($uri === '/cart' && $method === 'GET') {
+    $controller = new CartController();
+    $controller->index();
+} elseif ($uri === '/cart/add' && $method === 'GET') {
+    $controller = new CartController();
+    $controller->add();
+} elseif ($uri === '/cart/remove' && $method === 'GET') {
+    $controller = new CartController();
+    $controller->remove();
+}
+elseif ($uri === '/search' && $method === 'GET') {
+    $controller = new HomeController();
+    $controller->search();
 } elseif (preg_match('/^\/accounts(\?game_id=\d+)?$/', $uri) && $method === 'GET') {
     error_log("Accounts route accessed: $uri"); // Debug
     $controller = new AccountController();

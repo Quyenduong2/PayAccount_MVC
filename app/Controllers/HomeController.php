@@ -2,8 +2,9 @@
 require_once './app/Models/Game.php';
 require_once './app/Models/User.php';
 require_once './app/Models/Account.php';
+require_once './app/Core/Controller.php';
 
-class HomeController
+class HomeController extends Controller
 {
     private $userModel;
     private $gameModel;
@@ -31,7 +32,11 @@ class HomeController
         // Định nghĩa basePath
         $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
 
-        require './app/Views/home/index.php';
+        $this->view('home/index', [
+            'games' => $games,
+            'user' => $user,
+            'basePath' => $basePath
+        ]);
     }
 
     public function gameDetail($slug)
@@ -49,10 +54,16 @@ class HomeController
             error_log("Game found: {$game['game_name']}, slug: $slug, accounts: " . count($accounts));
         }
 
-        require './app/Views/games/game_detail.php';
+        $this->view('games/game_detail', [
+            'game' => $game,
+            'accounts' => $accounts,
+            'user' => $user,
+            'basePath' => $basePath
+        ]);
     }
 
-     public function accountDetail($account_id) {
+    public function accountDetail($account_id)
+    {
         $user = isset($_COOKIE['auth_token']) ? $this->userModel->getUserByToken($_COOKIE['auth_token']) : false;
         $account = $this->accountModel->getById($account_id);
         $images = $account ? $this->accountModel->getAccountImages($account_id) : [];
@@ -64,6 +75,41 @@ class HomeController
             error_log("Account found: {$account['account_title']}, id: $account_id, images: " . count($images));
         }
 
-        require 'app/Views/accounts/account_detail.php';
+        $this->view('accounts/account_detail', [
+            'account' => $account,
+            'images' => $images,
+            'user' => $user,
+            'basePath' => $basePath
+        ]);
     }
+
+    public function search()
+{
+    $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
+    $keyword = isset($_GET['q']) ? trim($_GET['q']) : '';
+    $games = [];
+    if ($keyword !== '') {
+        $games = $this->gameModel->getGames(20, $keyword);
+    }
+    // Nếu là ajax thì chỉ render phần body kết quả
+    if (isset($_GET['ajax'])) {
+        foreach ($games as $game) {
+            echo '<div class="mb-2">';
+            echo '<a href="' . $basePath . '/games/' . htmlspecialchars($game['game_slug']) . '">';
+            echo '<img src="' . htmlspecialchars($game['game_image']) . '" alt="" style="width:40px;height:40px;object-fit:cover;margin-right:8px;">';
+            echo htmlspecialchars($game['game_name']);
+            echo '</a>';
+            echo '</div>';
+        }
+        if (empty($games)) {
+            echo '<div class="alert alert-warning">Không tìm thấy game phù hợp.</div>';
+        }
+        exit;
+    }
+    $this->view('home/index', [
+        'games' => $games,
+        'keyword' => $keyword,
+        'basePath' => $basePath
+    ]);
+}
 }

@@ -21,7 +21,8 @@ class Game
 
     public function getGames($limit = 9, $search = '')
     {
-        $query = "SELECT game_id, game_name, game_image FROM games WHERE game_name LIKE :search LIMIT :limit";
+        // Thêm game_slug vào SELECT
+        $query = "SELECT game_id, game_name, game_slug, game_image FROM games WHERE game_name LIKE :search LIMIT :limit";
         $stmt = $this->db->prepare($query);
         $searchParam = '%' . $search . '%';
         $stmt->bindParam(':search', $searchParam, PDO::PARAM_STR);
@@ -39,7 +40,8 @@ class Game
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-      public function getGameBySlug($game_slug) {
+    public function getGameBySlug($game_slug)
+    {
         $query = "SELECT * FROM games WHERE game_slug = :game_slug";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':game_slug', $game_slug, PDO::PARAM_STR);

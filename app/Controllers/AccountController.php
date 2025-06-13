@@ -1,8 +1,9 @@
 <?php
 require_once './app/Models/Account.php';
 require_once './app/Models/Game.php';
+require_once './app/Core/Controller.php';
 
-class AccountController {
+class AccountController extends Controller {
     public function index() {
         $game_id = isset($_GET['game_id']) ? (int)$_GET['game_id'] : 1;
         $accountModel = new Account();
@@ -15,9 +16,14 @@ class AccountController {
         });
         $game = reset($game);
 
-        require './app/Views/accounts/index.php';
-    }
+         $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
 
-    
+         $this->view('accounts/account_detail', [
+            'accounts' => $accounts,
+            'games' => $games,
+            'game' => $game,
+            'basePath' => $basePath
+        ]);
+    }
 }
 ?>
