@@ -2,7 +2,6 @@
     <section class="account-detail">
         <div class="container">
 
-
             <?php if (!$account): ?>
                 <div class="alert alert-danger">Tài khoản không tồn tại.</div>
             <?php else: ?>

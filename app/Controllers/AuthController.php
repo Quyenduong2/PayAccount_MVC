@@ -3,10 +3,19 @@ require_once './app/Models/User.php';
 require_once './app/Models/Account.php';
 require_once './app/Models/Game.php';
 
+require_once __DIR__ . '/../../vendor/PHPMailer-master/src/PHPMailer.php';
+require_once __DIR__ . '/../../vendor/PHPMailer-master/src/Exception.php';
+require_once __DIR__ . '/../../vendor/PHPMailer-master/src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+
 class AuthController
 {
     public function login()
     {
+
         $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
 
         // Chỉ xử lý POST từ form đăng nhập
@@ -19,10 +28,23 @@ class AuthController
 
             $userModel = new User();
             $user = $userModel->login($email, $password);
+
             if ($user) {
                 $cookie_duration = $remember ? (30 * 24 * 60 * 60) : (24 * 60 * 60);
                 setcookie('auth_token', $user['auth_token'], time() + $cookie_duration, '/BaiTapChuyenDePHP/PayAccount_MVC/', '', false, true);
                 header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/');
+                error_log("Login successful for email: $email"); // Debug
+                $_SESSION['user'] = [
+                    'user_id'   => $user['user_id'],
+                    'email'     => $user['email'],
+                    'full_name' => $user['full_name']
+                ];
+                $this->sendMail(
+                    $user['email'],
+                    $user['full_name'],
+                    'Đăng nhập PayAccount',
+                    "Chào {$user['full_name']},<br>Bạn vừa đăng nhập vào PayAccount.<br>Nếu không phải bạn, hãy đổi mật khẩu ngay!"
+                );
                 exit;
             } else {
                 $error = "Email hoặc mật khẩu không đúng.";
@@ -48,7 +70,13 @@ class AuthController
 
             $userModel = new User();
             if ($userModel->register($username, $email, $full_name, $password)) {
-                error_log("Register successful: email=$email");
+                // Gửi mail xác nhận đăng ký
+                $this->sendMail(
+                    $email,
+                    $full_name,
+                    'Xác nhận đăng ký PayAccount',
+                    "Chào $full_name,<br>Cảm ơn bạn đã đăng ký tài khoản tại PayAccount.<br>Chúc bạn trải nghiệm vui vẻ!"
+                );
                 header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/login');
                 exit;
             } else {
@@ -59,14 +87,52 @@ class AuthController
 
         require './app/Views/Auth/register.php';
     }
-    public function logout()
+
+    private function sendMail($toEmail, $toName, $subject, $bodyHtml)
     {
-        $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
-        error_log("Logout function called"); // Debug
-        setcookie('auth_token', '', time() - 3600, '/BaiTapChuyenDePHP/PayAccount_MVC/');
-        header('Location: ' . $basePath . '/');
-        exit;
+        $mail = new PHPMailer(true);
+        try {
+            $mail->SMTPDebug = 2;
+            $mail->Debugoutput = function ($str, $level) {
+                error_log("SMTP Debug level $level: $str");
+            };
+
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'dgiaquyen40@gmail.com'; // Thay bằng email của bạn
+            $mail->Password = 'zdnlgzpjkqvx mskb'; // Thay bằng App Password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            $mail->setFrom('dgiaquyen40@gmail.com', 'PayAccount');
+            $mail->addAddress($toEmail, $toName);
+            $mail->CharSet = 'UTF-8';
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body = $bodyHtml;
+            $mail->AltBody = strip_tags($bodyHtml);
+
+            $mail->send();
+            error_log("Email sent successfully to $toEmail");
+        } catch (Exception $e) {
+            error_log("Failed to send email to $toEmail: {$mail->ErrorInfo}");
+        }
+    }public function logout()
+{
+    $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    session_unset();
+    session_destroy();
+
+    // Xóa cookie đăng nhập nếu có
+    if (isset($_COOKIE['auth_token'])) {
+        setcookie('auth_token', '', time() - 3600, '/');
     }
+    header('Location: ' . $basePath . '/');
+    exit;
+}
+  
 
     public function forgotPassword()
     {
@@ -81,6 +147,12 @@ class AuthController
                 if ($password) {
                     // Cập nhật mật khẩu mới
                     if ($userModel->updatePassword($email, $password)) {
+                        $this->sendMail(
+                            $email,
+                            $user['full_name'],
+                            'Đặt lại mật khẩu PayAccount',
+                            "Chào {$user['full_name']},<br>Bạn vừa đặt lại mật khẩu thành công.<br>Nếu không phải bạn, hãy liên hệ hỗ trợ!"
+                        );
                         $success = "Mật khẩu đã được cập nhật. Vui lòng đăng nhập.";
                     } else {
                         $error = "Cập nhật mật khẩu thất bại.";
@@ -373,161 +445,161 @@ class AuthController
         require './app/Views/Auth/profile.php';
     }
 
-   public function sellAccount()
-{
-    $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
-    if (!isset($_COOKIE['auth_token'])) {
-        error_log("Sell account: No auth_token, redirecting to login");
-        header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/login');
-        exit;
-    }
-    $userModel = new User();
-    $user = $userModel->getUserByToken($_COOKIE['auth_token']);
-    if (!$user || ($user['role'] === 'user' && !$user['is_kyc_verified'])) {
-        error_log("Sell account: User not verified or invalid, redirecting to profile");
-        header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/profile');
-        exit;
-    }
-
-    $gameModel = new Game();
-    $games = $gameModel->getGames(100);
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        error_log("Sell account: POST request received");
-        error_log("POST data: " . print_r($_POST, true));
-        error_log("FILES data: " . print_r($_FILES, true));
-
-        $game_id = $_POST['game_id'] ?? '';
-        $account_name = $_POST['account_name'] ?? '';
-        $price = $_POST['price'] ?? '';
-        $description = $_POST['description'] ?? '';
-
-        if ($game_id && $account_name && $price >= 0 && !empty($_FILES['images']['name'][0])) {
-            $accountModel = new Account();
-            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "$basePath/public/uploads/accounts/{$user['user_id']}/";
-            $baseUrl = "http://localhost$basePath/public/uploads/accounts/{$user['user_id']}/";
-
-            // Tạo thư mục nếu chưa tồn tại
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-
-            // Xử lý upload ảnh
-            $image_urls = [];
-            $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
-            $max_files = 5;
-            $uploaded_files = $_FILES['images'];
-
-            for ($i = 0; $i < min(count($uploaded_files['name']), $max_files); $i++) {
-                if ($uploaded_files['error'][$i] === UPLOAD_ERR_OK) {
-                    $ext = strtolower(pathinfo($uploaded_files['name'][$i], PATHINFO_EXTENSION));
-                    if (in_array($ext, $allowed_extensions)) {
-                        $filename = uniqid('account_') . '.' . $ext;
-                        $dest_path = $uploadDir . $filename;
-                        if (move_uploaded_file($uploaded_files['tmp_name'][$i], $dest_path)) {
-                            $image_urls[] = $baseUrl . $filename;
-                        } else {
-                            error_log("Sell account: Failed to move uploaded file: " . $uploaded_files['name'][$i]);
-                        }
-                    } else {
-                        error_log("Sell account: Invalid file extension: " . $uploaded_files['name'][$i]);
-                    }
-                }
-            }
-
-            // Tạo tài khoản và lưu ảnh
-            if ($accountModel->create($user['user_id'], $game_id, $account_name, $price, $description, $image_urls)) {
-                if (empty($image_urls)) {
-                    $warning = "Tài khoản đã được đăng bán, nhưng không có ảnh nào được upload.";
-                } else {
-                    $success = "Đăng bán tài khoản thành công với " . count($image_urls) . " ảnh!";
-                }
-            } else {
-                $error = "Đăng bán thất bại. Vui lòng thử lại.";
-                error_log("Sell account: Failed to create account");
-            }
-        } else {
-            $error = "Vui lòng điền đầy đủ thông tin và upload ít nhất một ảnh.";
-            error_log("Sell account: Invalid form data or no images uploaded");
+    public function sellAccount()
+    {
+        $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
+        if (!isset($_COOKIE['auth_token'])) {
+            error_log("Sell account: No auth_token, redirecting to login");
+            header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/login');
+            exit;
         }
-    }
+        $userModel = new User();
+        $user = $userModel->getUserByToken($_COOKIE['auth_token']);
+        if (!$user || ($user['role'] === 'user' && !$user['is_kyc_verified'])) {
+            error_log("Sell account: User not verified or invalid, redirecting to profile");
+            header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/profile');
+            exit;
+        }
 
-    error_log("Sell Account page accessed, user: {$user['email']}");
-    require './app/Views/Auth/sell_account.php';
-}
+        $gameModel = new Game();
+        $games = $gameModel->getGames(100);
 
-public function addGame()
-{
-    $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
-    if (!isset($_COOKIE['auth_token'])) {
-        error_log("Add game: No auth_token, redirecting to login");
-        header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/login');
-        exit;
-    }
-    $userModel = new User();
-    $user = $userModel->getUserByToken($_COOKIE['auth_token']);
-    if (!$user || $user['role'] !== 'admin') {
-        error_log("Add game: User not admin, redirecting to profile");
-        header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/profile');
-        exit;
-    }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            error_log("Sell account: POST request received");
+            error_log("POST data: " . print_r($_POST, true));
+            error_log("FILES data: " . print_r($_FILES, true));
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        error_log("Add game: POST request received");
-        error_log("POST data: " . print_r($_POST, true));
-        error_log("FILES data: " . print_r($_FILES, true));
+            $game_id = $_POST['game_id'] ?? '';
+            $account_name = $_POST['account_name'] ?? '';
+            $price = $_POST['price'] ?? '';
+            $description = $_POST['description'] ?? '';
 
-        $game_name = $_POST['game_name'] ?? '';
-        $game_slug = $_POST['game_slug'] ?? '';
-        $description = $_POST['description'] ?? '';
+            if ($game_id && $account_name && $price >= 0 && !empty($_FILES['images']['name'][0])) {
+                $accountModel = new Account();
+                $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "$basePath/public/uploads/accounts/{$user['user_id']}/";
+                $baseUrl = "http://localhost$basePath/public/uploads/accounts/{$user['user_id']}/";
 
-        if ($game_name && $game_slug && !empty($_FILES['game_image']['name'])) {
-            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "$basePath/public/uploads/games/";
-            $baseUrl = "http://localhost$basePath/public/uploads/games/";
+                // Tạo thư mục nếu chưa tồn tại
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
 
-            // Tạo thư mục nếu chưa tồn tại
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-
-            // Xử lý upload ảnh
-            $image = $_FILES['game_image'];
-            if ($image['error'] === UPLOAD_ERR_OK) {
-                $ext = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+                // Xử lý upload ảnh
+                $image_urls = [];
                 $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
-                if (in_array($ext, $allowed_extensions)) {
-                    $filename = uniqid('game_') . '.' . $ext;
-                    $dest_path = $uploadDir . $filename;
-                    if (move_uploaded_file($image['tmp_name'], $dest_path)) {
-                        $game_image = $baseUrl . $filename;
+                $max_files = 5;
+                $uploaded_files = $_FILES['images'];
 
-                        // Lưu game vào database
-                        $gameModel = new Game();
-                        if ($gameModel->create($game_name, $game_slug, $game_image, $description)) {
-                            $success = "Thêm game thành công!";
+                for ($i = 0; $i < min(count($uploaded_files['name']), $max_files); $i++) {
+                    if ($uploaded_files['error'][$i] === UPLOAD_ERR_OK) {
+                        $ext = strtolower(pathinfo($uploaded_files['name'][$i], PATHINFO_EXTENSION));
+                        if (in_array($ext, $allowed_extensions)) {
+                            $filename = uniqid('account_') . '.' . $ext;
+                            $dest_path = $uploadDir . $filename;
+                            if (move_uploaded_file($uploaded_files['tmp_name'][$i], $dest_path)) {
+                                $image_urls[] = $baseUrl . $filename;
+                            } else {
+                                error_log("Sell account: Failed to move uploaded file: " . $uploaded_files['name'][$i]);
+                            }
                         } else {
-                            $error = "Thêm game thất bại. Vui lòng thử lại.";
-                            error_log("Add game: Failed to create game");
+                            error_log("Sell account: Invalid file extension: " . $uploaded_files['name'][$i]);
                         }
+                    }
+                }
+
+                // Tạo tài khoản và lưu ảnh
+                if ($accountModel->create($user['user_id'], $game_id, $account_name, $price, $description, $image_urls)) {
+                    if (empty($image_urls)) {
+                        $warning = "Tài khoản đã được đăng bán, nhưng không có ảnh nào được upload.";
                     } else {
-                        $error = "Không thể lưu ảnh game.";
-                        error_log("Add game: Failed to move uploaded file: " . $image['name']);
+                        $success = "Đăng bán tài khoản thành công với " . count($image_urls) . " ảnh!";
                     }
                 } else {
-                    $error = "Định dạng ảnh không hợp lệ (chỉ hỗ trợ JPG, PNG, GIF).";
-                    error_log("Add game: Invalid file extension: " . $image['name']);
+                    $error = "Đăng bán thất bại. Vui lòng thử lại.";
+                    error_log("Sell account: Failed to create account");
                 }
             } else {
-                $error = "Lỗi khi upload ảnh.";
-                error_log("Add game: Upload error code: " . $image['error']);
+                $error = "Vui lòng điền đầy đủ thông tin và upload ít nhất một ảnh.";
+                error_log("Sell account: Invalid form data or no images uploaded");
             }
-        } else {
-            $error = "Vui lòng điền đầy đủ thông tin và upload ảnh game.";
-            error_log("Add game: Invalid form data or no image uploaded");
         }
+
+        error_log("Sell Account page accessed, user: {$user['email']}");
+        require './app/Views/Auth/sell_account.php';
     }
 
-    error_log("Add Game page accessed, user: {$user['email']}");
-    require './app/Views/Auth/add_game.php';
-}
+    public function addGame()
+    {
+        $basePath = '/BaiTapChuyenDePHP/PayAccount_MVC';
+        if (!isset($_COOKIE['auth_token'])) {
+            error_log("Add game: No auth_token, redirecting to login");
+            header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/login');
+            exit;
+        }
+        $userModel = new User();
+        $user = $userModel->getUserByToken($_COOKIE['auth_token']);
+        if (!$user || $user['role'] !== 'admin') {
+            error_log("Add game: User not admin, redirecting to profile");
+            header('Location: /BaiTapChuyenDePHP/PayAccount_MVC/profile');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            error_log("Add game: POST request received");
+            error_log("POST data: " . print_r($_POST, true));
+            error_log("FILES data: " . print_r($_FILES, true));
+
+            $game_name = $_POST['game_name'] ?? '';
+            $game_slug = $_POST['game_slug'] ?? '';
+            $description = $_POST['description'] ?? '';
+
+            if ($game_name && $game_slug && !empty($_FILES['game_image']['name'])) {
+                $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "$basePath/public/uploads/games/";
+                $baseUrl = "http://localhost$basePath/public/uploads/games/";
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                // Xử lý upload ảnh
+                $image = $_FILES['game_image'];
+                if ($image['error'] === UPLOAD_ERR_OK) {
+                    $ext = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+                    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                    if (in_array($ext, $allowed_extensions)) {
+                        $filename = uniqid('game_') . '.' . $ext;
+                        $dest_path = $uploadDir . $filename;
+                        if (move_uploaded_file($image['tmp_name'], $dest_path)) {
+                            $game_image = $baseUrl . $filename;
+
+                            // Lưu game vào database
+                            $gameModel = new Game();
+                            if ($gameModel->create($game_name, $game_slug, $game_image, $description)) {
+                                $success = "Thêm game thành công!";
+                            } else {
+                                $error = "Thêm game thất bại. Vui lòng thử lại.";
+                                error_log("Add game: Failed to create game");
+                            }
+                        } else {
+                            $error = "Không thể lưu ảnh game.";
+                            error_log("Add game: Failed to move uploaded file: " . $image['name']);
+                        }
+                    } else {
+                        $error = "Định dạng ảnh không hợp lệ (chỉ hỗ trợ JPG, PNG, GIF).";
+                        error_log("Add game: Invalid file extension: " . $image['name']);
+                    }
+                } else {
+                    $error = "Lỗi khi upload ảnh.";
+                    error_log("Add game: Upload error code: " . $image['error']);
+                }
+            } else {
+                $error = "Vui lòng điền đầy đủ thông tin và upload ảnh game.";
+                error_log("Add game: Invalid form data or no image uploaded");
+            }
+        }
+
+        error_log("Add Game page accessed, user: {$user['email']}");
+        require './app/Views/Auth/add_game.php';
+    }
 }

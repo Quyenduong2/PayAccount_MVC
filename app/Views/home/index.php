@@ -1,3 +1,9 @@
+<?php
+require_once './vendor/PHPMailer-master/src/PHPMailer.php';
+require_once './vendor/PHPMailer-master/src/Exception.php';
+require_once './vendor/PHPMailer-master/src/SMTP.php';
+?>
+
  <form class="search-container " id="searchForm" action="<?php echo $basePath; ?>/search" method="get" style="max-width:300px;">
      <input name="q" id="searchInput" type="search" class="search-input" placeholder="Tìm kiếm game...">
      <button type="submit" class="search-icon">🔍</button>

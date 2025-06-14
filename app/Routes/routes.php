@@ -49,6 +49,12 @@ elseif ($uri === '/cart' && $method === 'GET') {
 } elseif ($uri === '/cart/remove' && $method === 'GET') {
     $controller = new CartController();
     $controller->remove();
+} elseif ($uri === '/cart/details' && $method === 'GET') {
+    $c = new CartController(); $c->details();
+} elseif ($uri === '/cart/checkout') {
+    $c = new CartController(); $c->checkout();
+} elseif ($uri === '/cart/confirm') {
+    $c = new CartController(); $c->confirm();
 }
 elseif ($uri === '/search' && $method === 'GET') {
     $controller = new HomeController();
